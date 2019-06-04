@@ -1,0 +1,13 @@
+{
+    "name": "unlooped/ts-resources",
+    "description": "often used typescript code",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Steffen Persch",
+            "email": "s.persch@unlooped.com"
+        }
+    ],
+    "require": {}
+}
