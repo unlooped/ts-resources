@@ -1,5 +1,4 @@
-/// <reference path="../@types/select2entity.d.ts" />
-
+import * as jQuery from 'jquery';
 import htmlString = JQuery.htmlString;
 
 class CollectionHelper {
@@ -58,8 +57,6 @@ class CollectionHelper {
 
         let el: JQuery = jQuery(row).attr('role', this.collectionRowRole);
         this.container.append(el);
-
-        el.find('.select2entity[data-autostart="true"]').select2entity();
 
         this.updateDeleteBtns();
         this.loadDeleteBtnEvents();
