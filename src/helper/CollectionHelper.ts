@@ -65,7 +65,7 @@ class CollectionHelper {
         this.currentCnt++;
     }
 
-    protected deleteRow(e: JQuery.Event) {
+    protected deleteRow(e: JQuery.TriggeredEvent) {
         e.preventDefault();
 
         let target = jQuery(e.target);
