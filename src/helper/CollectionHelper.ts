@@ -1,7 +1,7 @@
 import * as jQuery from 'jquery';
 import htmlString = JQuery.htmlString;
 
-class CollectionHelper {
+export class CollectionHelper {
 
     private collectionRowRole: string = 'collection-row';
 
