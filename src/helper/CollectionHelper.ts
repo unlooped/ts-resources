@@ -81,6 +81,10 @@ export class CollectionHelper {
         target.parents('[role="' + this.collectionRowRole + '"]').remove();
         this.container.trigger('unl.row_deleted', target);
     }
+
+    public getCurrentCount(): number {
+        return this.currentCnt;
+    }
 }
 
 export function initCollectionHelpers() {
