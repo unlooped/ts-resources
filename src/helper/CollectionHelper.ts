@@ -78,7 +78,7 @@ export class CollectionHelper {
 
     public deleteRow(target: HTMLElement|JQuery) {
         target = jQuery(target);
-        target.parents('[role="' + this.collectionRowRole + '"]').remove();
+        target.parents('[role="' + this.collectionRowRole + '"]').first().remove();
         this.container.trigger('unl.row_deleted', target);
     }
 
