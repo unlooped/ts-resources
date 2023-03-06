@@ -58,7 +58,7 @@ class CheckboxHelper {
         e.preventDefault();
         let checkboxes = this.getCheckboxesForEvent(e);
         checkboxes.forEach((cb) => {
-            cb.checked = !cb.checked;
+            cb.checked = cb.checked === true;
         });
 
         if (checkboxes.length > 0) {
