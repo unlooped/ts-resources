@@ -1,41 +1,22 @@
-export interface UploadControllerOptions {
-    fileUploadSelector: string,
-    formSelector: string,
-    fileTargetSelector: string,
-    progressbarSelector: string,
-}
-
-export class UploadController {
-
-    private options: UploadControllerOptions;
-
-    private fileUploadEl: JQuery;
-    private files: JQuery;
-
-    private existingFileCount: number = 0;
-    private progressBar: JQuery;
-    private progressRow: JQuery;
-    private form: JQuery;
-
-
-    constructor(form: JQuery = null, options: UploadControllerOptions) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.UploadController = void 0;
+class UploadController {
+    constructor(form = null, options) {
+        this.existingFileCount = 0;
         this.form = form;
         this.options = options;
-
         this.loadElements();
         this.loadEvents();
-
         this.init();
     }
-
-    private loadElements() {
+    loadElements() {
         this.fileUploadEl = jQuery(this.options.fileUploadSelector);
         this.files = jQuery(this.options.fileTargetSelector);
         this.progressBar = jQuery(this.options.progressbarSelector);
         this.progressRow = this.progressBar.parents('.row').first();
     }
-
-    private loadEvents() {
+    loadEvents() {
         this.fileUploadEl
             .on('fileuploadadd', this.fileUploadAdd.bind(this))
             .on('fileuploadprocessalways', this.fileUploadProcessAlways.bind(this))
@@ -43,8 +24,7 @@ export class UploadController {
             .on('fileuploaddone', this.fileUploadDone.bind(this))
             .on('fileuploadfail', this.fileUploadFail.bind(this));
     }
-
-    private init() {
+    init() {
         this.existingFileCount = this.files.children().length;
         // @ts-ignore
         this.fileUploadEl.fileupload({
@@ -56,33 +36,25 @@ export class UploadController {
             previewCanvas: false,
         });
     }
-
-    private fileUploadAdd(e, data) {
+    fileUploadAdd(e, data) {
         console.log('fileUploadAdd', data);
-        this.form.trigger('disable-submit', {'message': 'Upload Running'});
+        this.form.trigger('disable-submit', { 'message': 'Upload Running' });
         let protoType = this.files.data('prototype');
         this.progressRow.removeClass('invisible');
-
         jQuery.each(data.files, (index, file) => {
             let idx = this.existingFileCount++;
-
             let prefix = this.options.formSelector + idx + '_';
             let ptEl = jQuery(protoType.replace(/__name__/g, idx));
-
             ptEl.find(prefix + 'name').val(file.name);
-
             file.listEl = ptEl;
             file.index = idx;
-
             ptEl.appendTo(this.files);
         });
     }
-
-    private fileUploadProcessAlways(e, data) {
+    fileUploadProcessAlways(e, data) {
         console.log('fileuploadprocessalways', data);
         let index = data.index;
         let file = data.files[index];
-
         if (file.preview) {
             file.listEl.find('.gi_preview').append(file.preview);
         }
@@ -90,28 +62,23 @@ export class UploadController {
             file.listEl.append($('<span class="text-danger"/>').text(file.error));
         }
     }
-
-    private fileUploadProgressAll(e, data) {
+    fileUploadProgressAll(e, data) {
         console.log('fileuploadprogressall', data);
         let progress = Math.round(data.loaded / data.total * 100);
-
         this.progressBar.css('width', progress + '%');
         this.progressBar.attr('aria-valuenow', progress);
     }
-
-    private fileUploadDone(e, data) {
+    fileUploadDone(e, data) {
         console.log('fileuploaddone', data);
-
         jQuery.each(data.files, (index, file) => {
             let prefix = this.options.formSelector + file.index + '_';
             file.listEl.find(prefix + 'file').val(data.result.filename);
         });
-
         this.progressRow.addClass('invisible');
         this.form.trigger('enable-submit');
     }
-
-    private fileUploadFail(e, data) {
+    fileUploadFail(e, data) {
         console.log('fileUploadFail', data);
     }
 }
+exports.UploadController = UploadController;

@@ -1,0 +1,7 @@
+{
+  "name": "@unlooped/ts-resources",
+  "version": "1.0.0",
+  "exports": {
+    "./*": "./*.js"
+  }
+}
