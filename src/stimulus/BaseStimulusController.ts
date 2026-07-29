@@ -8,33 +8,44 @@ type DispatchOptions = Partial<{
     cancelable: boolean
 }>
 
+interface RegisteredEvent {
+    element: Element | Window | Document;
+    type: string;
+    listener: EventListener;
+    options?: boolean | AddEventListenerOptions;
+}
+
 export class BaseStimulusController<ElementType extends Element = Element> extends Controller<ElementType> {
 
-    private _registeredEvents: any[] = [];
+    private _registeredEvents: RegisteredEvent[] = [];
 
     disconnect() {
         super.disconnect();
 
         this._registeredEvents.forEach((entry) => {
-            entry.element.removeEventListener(entry.type, entry.listener);
-        })
+            entry.element.removeEventListener(entry.type, entry.listener, entry.options);
+        });
+        this._registeredEvents = [];
     }
 
     protected addEventListener<K extends keyof HTMLElementEventMap | string>(
         element: Element | Window | Document,
         type: K,
-        listener: (this: HTMLFormElement, ev: K extends keyof HTMLElementEventMap ? HTMLElementEventMap[K] : Event) => any,
+        listener: (this: EventTarget | null, ev: K extends keyof HTMLElementEventMap ? HTMLElementEventMap[K] : Event) => any,
         options?: boolean | AddEventListenerOptions
     ): void {
-        element.addEventListener(type as string, (event: Event) => {
-            this.application.logger.groupCollapsed(this.context.identifier + ' #event_received ' + event.type);
-            this.application.logger.log("details:", {'element': this.element, 'event': event});
-            this.application.logger.groupEnd();
+        const wrapped: EventListener = (event: Event) => {
+            if (this.application.debug) {
+                this.application.logger.groupCollapsed(this.context.identifier + ' #event_received ' + event.type);
+                this.application.logger.log("details:", {'element': this.element, 'event': event});
+                this.application.logger.groupEnd();
+            }
 
-            listener.call(event.currentTarget, event);
-        }, options);
+            listener.call(event.currentTarget, event as any);
+        };
 
-        this._registeredEvents.push({ element, type, listener });
+        element.addEventListener(type as string, wrapped, options);
+        this._registeredEvents.push({ element, type: type as string, listener: wrapped, options });
     }
 
     public dispatch(
@@ -47,9 +58,6 @@ export class BaseStimulusController<ElementType extends Element = Element> exten
             cancelable = true,
         }: DispatchOptions = {}
     ) {
-        const type = prefix ? `${prefix}:${eventName}` : eventName
-        this.application.logger.groupCollapsed(this.context.identifier + ' #event_dispatched ' + type);
-
         const event = super.dispatch(eventName, {
             target: target,
             detail: detail,
@@ -58,8 +66,12 @@ export class BaseStimulusController<ElementType extends Element = Element> exten
             cancelable: cancelable,
         });
 
-        this.application.logger.log("details:", {'element': this.element, 'event': event});
-        this.application.logger.groupEnd();
+        if (this.application.debug) {
+            const type = prefix ? `${prefix}:${eventName}` : eventName;
+            this.application.logger.groupCollapsed(this.context.identifier + ' #event_dispatched ' + type);
+            this.application.logger.log("details:", {'element': this.element, 'event': event});
+            this.application.logger.groupEnd();
+        }
 
         return event;
     }

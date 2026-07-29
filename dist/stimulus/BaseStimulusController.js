@@ -10,21 +10,23 @@ class BaseStimulusController extends stimulus_1.Controller {
     disconnect() {
         super.disconnect();
         this._registeredEvents.forEach((entry) => {
-            entry.element.removeEventListener(entry.type, entry.listener);
+            entry.element.removeEventListener(entry.type, entry.listener, entry.options);
         });
+        this._registeredEvents = [];
     }
     addEventListener(element, type, listener, options) {
-        element.addEventListener(type, (event) => {
-            this.application.logger.groupCollapsed(this.context.identifier + ' #event_received ' + event.type);
-            this.application.logger.log("details:", { 'element': this.element, 'event': event });
-            this.application.logger.groupEnd();
+        const wrapped = (event) => {
+            if (this.application.debug) {
+                this.application.logger.groupCollapsed(this.context.identifier + ' #event_received ' + event.type);
+                this.application.logger.log("details:", { 'element': this.element, 'event': event });
+                this.application.logger.groupEnd();
+            }
             listener.call(event.currentTarget, event);
-        }, options);
-        this._registeredEvents.push({ element, type, listener });
+        };
+        element.addEventListener(type, wrapped, options);
+        this._registeredEvents.push({ element, type: type, listener: wrapped, options });
     }
     dispatch(eventName, { target = this.element, detail = {}, prefix = this.identifier, bubbles = true, cancelable = true, } = {}) {
-        const type = prefix ? `${prefix}:${eventName}` : eventName;
-        this.application.logger.groupCollapsed(this.context.identifier + ' #event_dispatched ' + type);
         const event = super.dispatch(eventName, {
             target: target,
             detail: detail,
@@ -32,8 +34,12 @@ class BaseStimulusController extends stimulus_1.Controller {
             bubbles: bubbles,
             cancelable: cancelable,
         });
-        this.application.logger.log("details:", { 'element': this.element, 'event': event });
-        this.application.logger.groupEnd();
+        if (this.application.debug) {
+            const type = prefix ? `${prefix}:${eventName}` : eventName;
+            this.application.logger.groupCollapsed(this.context.identifier + ' #event_dispatched ' + type);
+            this.application.logger.log("details:", { 'element': this.element, 'event': event });
+            this.application.logger.groupEnd();
+        }
         return event;
     }
 }

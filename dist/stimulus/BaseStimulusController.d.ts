@@ -9,7 +9,7 @@ type DispatchOptions = Partial<{
 export declare class BaseStimulusController<ElementType extends Element = Element> extends Controller<ElementType> {
     private _registeredEvents;
     disconnect(): void;
-    protected addEventListener<K extends keyof HTMLElementEventMap | string>(element: Element | Window | Document, type: K, listener: (this: HTMLFormElement, ev: K extends keyof HTMLElementEventMap ? HTMLElementEventMap[K] : Event) => any, options?: boolean | AddEventListenerOptions): void;
+    protected addEventListener<K extends keyof HTMLElementEventMap | string>(element: Element | Window | Document, type: K, listener: (this: EventTarget | null, ev: K extends keyof HTMLElementEventMap ? HTMLElementEventMap[K] : Event) => any, options?: boolean | AddEventListenerOptions): void;
     dispatch(eventName: string, { target, detail, prefix, bubbles, cancelable, }?: DispatchOptions): CustomEvent<Object>;
 }
 export {};
